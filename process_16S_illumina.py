@@ -3,6 +3,7 @@
                                                                                               
 import sys,os
 import warnings
+import subprocess
 
 username = str(os.getlogin())
 
@@ -20,7 +21,9 @@ if not os.path.exists("/home/comp/jglab/"+username+"/tmp"):
    os.makedirs("/home/comp/jglab/"+username+"/tmp")
    print ("No tmp folder detected under home directory, so created directory for future use /home/comp/jglab/"+username+"/tmp\n")
 
-# Ungzip reads 1 through 3 into tmp folder
-os.system("for f in "+readsfile+"*.gz; do   STEM=$(basename \"${f}\" .gz);   gunzip -c \"${f}\" > /home/comp/jglab/"+username+"/tmp/\"${STEM}\"; done")
+# Ungzip reads 1 and 2 plus index read into tmp folder
+decompress = subprocess.call(("for f in "+readsfile+"*.gz; do if test \"${f#*R1_001.fastq.gz*}\" != \"$f\"; then READ1=$(basename \"${f}\" .gz); echo \"Decompressing Read 1: \"${READ1}\"\";  gunzip -c \"${f}\" > /home/comp/jglab/"+username+"/tmp/\"${READ1}\"; elif test \"${f#*R2_001.fastq.gz*}\" != \"$f\"; then INDEX=$(basename \"${f}\" .gz); echo \"Decompressing Index Read: \"${INDEX}\"\";  gunzip -c \"${f}\" > /home/comp/jglab/"+username+"/tmp/\"${INDEX}\"; elif test \"${f#*R3_001.fastq.gz*}\" != \"$f\"; then READ2=$(basename \"${f}\" .gz); echo \"Decompressing Read 2: \"${READ2}\"\n\";  gunzip -c \"${f}\" > /home/comp/jglab/"+username+"/tmp/\"${READ2}\"; fi; done"), shell="FALSE")
 
-print ("Fastq files are unzipped, now beginning to trim and overlap R1 and R3") 
+# Need to isolate variables READ1, READ2 and INDEX
+
+print ("Fastq files are decompressed, now beginning to trim and overlap Reads 1 and 2\n") 
